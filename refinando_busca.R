@@ -92,6 +92,23 @@ my_search <- write_search(groupdata = mysearchterms, exactphrase = TRUE,
 my_search
 
 
+#New search:
+
+#(("trophic* interact*" OR predat* OR "consum* resourc*" OR 
+#"consum* and resourc*" OR consumer-resourc*) AND ("climat* chang*" OR 
+#"global* warm*" OR "temperatur* effect*" OR "water* temperatur*" OR 
+#"climat* warm*" OR "higher* temperatur*" OR "increas* temperatur*" OR 
+#"lower* temperatur*" OR "temperatur* increas*" OR "temperatur* influenc*"
+#OR "temperatur* regim*" OR warm* OR "optim* temperatur*" OR "thermal* 
+#environ*" OR "temperatur* depend*") AND (ectotherm* OR poikilotherm* OR 
+#"cold*-blooded" OR fish* OR amphib* OR invertebrat* OR insect* OR arthropod*)
+#AND ("function* respons*" OR "consumpt* rate*" OR "feed* rate*" OR "predat* 
+#rate*" OR "kill* rate*" OR "consum* rate*" OR "clearanc* rate*" OR "attack*
+#rate*" OR captur* OR "handl* time*" OR "prey* manipul* time*" OR "prey* 
+#handl*" OR "growth* rate*"))
+
+#In Web of Science and Scopus
+
 #New search results
 
 new_search <- import_results(file = c("savedrecs_new1.txt",
