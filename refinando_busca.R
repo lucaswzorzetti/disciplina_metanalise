@@ -4,6 +4,7 @@ library(litsearchr)
 library(revtools)
 library(stringi)
 library(stringr)
+library(dplyr)
 
 
 #### Litsearch
@@ -100,8 +101,7 @@ my_search
 #"climat* warm*" OR "higher* temperatur*" OR "increas* temperatur*" OR 
 #"lower* temperatur*" OR "temperatur* increas*" OR "temperatur* influenc*"
 #OR "temperatur* regim*" OR warm* OR "optim* temperatur*" OR "thermal* 
-#environ*" OR "temperatur* depend*") AND (ectotherm* OR poikilotherm* OR 
-#"cold*-blooded" OR fish* OR amphib* OR invertebrat* OR insect* OR arthropod*)
+#environ*" OR "temperatur* depend*") AND (ectotherm* OR poikilotherm*)
 #AND ("function* respons*" OR "consumpt* rate*" OR "feed* rate*" OR "predat* 
 #rate*" OR "kill* rate*" OR "consum* rate*" OR "clearanc* rate*" OR "attack*
 #rate*" OR captur* OR "handl* time*" OR "prey* manipul* time*" OR "prey* 
@@ -111,19 +111,36 @@ my_search
 
 #New search results
 
-new_search <- import_results(file = c("savedrecs_new1.txt",
-                                      "savedrecs_new2.txt",
-                                      "savedrecs_new3.txt",
-                                      "savedrecs_new4.txt",
-                                      "savedrecs_new5.txt",
-                                        "scopus_new.bib"))
+definitive_search <- import_results(file = c("savedrecs_definitivo.txt",
+                                        "scopus_definitivo.bib"))
 #Deduplicating
-new_dedup <- remove_duplicates(df = new_search, field = "title",
+def_dedup <- remove_duplicates(df = definitive_search, field = "title",
                                  method = "exact")
-new_dedup2 <- remove_duplicates(df = new_search, field = "title",
+def_dedup2 <- remove_duplicates(df = definitive_search, field = "title",
                                   method = "string_osa")
 
+#Salvando
+write.csv(def_dedup2, "busca_definitivo.csv", row.names = FALSE)
+
+
 #### Revtools
+table <- screen_abstracts(def_dedup2)
+View(table)
+
+screen_topics(def_dedup2)
+
+
+screened <- screen_abstracts()
+View(screened)
+
+
+screened_selected <- screened %>% filter(screened_abstracts == "selected")
+View(screened_selected)
+
+write.csv(screened_selected, "selected.csv", row.names = FALSE)
+
+selected <- read.csv(file = "selected.csv", header = T)
+screen_titles(selected)
 
 
 
