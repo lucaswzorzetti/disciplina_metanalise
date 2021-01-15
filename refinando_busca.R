@@ -145,3 +145,163 @@ screen_titles(selected)
 
 
 
+
+##### CALCULANDO EFFECT SIZE #####
+library(dplyr)
+library(metafor)
+
+tabela <- read.csv("codificacaoR.csv", header = TRUE, sep = ";")
+tabela
+tabela$z_fisher <- as.numeric(tabela$z_fisher)
+#View(tabela)
+
+tabela <- tabela %>% mutate(variancia = (1/(n-3)),
+                            cor = abs(sqrt(r2)) ) 
+tabela <- tabela %>% mutate(ano = c(rep(2020, 8), 2020, 2007, 1982))
+tabela <- tabela %>% mutate(autores = c(rep("Twardochleb et al", 8), 
+                                        "Ryan et al", "Ding-Xu et al",
+                                        "Gresens et al"))
+
+View(tabela)
+
+str(tabela)
+
+### Modelo aleatorio
+res <- rma(yi = z_fisher, vi = variancia, vtype = "UB", data = tabela,
+                      weighted = TRUE, knha=FALSE, level=95, digits=4)
+res
+summary(res)
+
+#forest plot do modelo aleatorio
+forest(res, slab = paste(tabela$autores, tabela$ano, sep = ", "),
+       header = "Author(s) and Year", mlab="")
+text(-12, -1, pos=4, cex=0.75, bquote(paste("RE Model (Q = ",
+                                            .(formatC(res$QE, digits=2, format="f")), ", df = ", .(res$k - res$p),
+                                            ", p = ", .(formatC(res$QEp, digits=2, format="f")), "; ", I^2, " = ",
+                                            .(formatC(res$I2, digits=1, format="f")), "%)")))
+#Heterogeneidade
+funnel(res) #bem heterogeneo
+
+radial(res)
+
+qqnorm(res)
+
+influence.rma.uni(res) #parecem normais os residuos e suas distancias
+
+regtest(res) #é assimetrico entao (?)
+
+#fail safe number
+fsn(yi = tabela$z_fisher, vi = tabela$variancia, type = "Rosenthal")
+fsn(yi = tabela$z_fisher, vi = tabela$variancia, type = "Rosenberg")
+fsn(yi = tabela$z_fisher, vi = tabela$variancia, type = "Orwin")
+
+#
+trimfill(res)
+
+cumul(res)
+forest(cumul(res))
+
+rstudent.rma.uni(res)
+
+###Com moderadores
+##estrategia predacao
+#modelo com intercepto p/ obter heterogeneidade
+res_mod <- rma(yi = z_fisher, vi = variancia,
+               mods = ~factor(estrategia_predacao),
+               vtype = "UB", data = tabela,
+               weighted = TRUE, knha=FALSE, level=95, digits=4)
+res_mod
+confint(res_mod) #valores das heterogeidades
+anova(res_mod, type = "II") #nao significativo
+
+#sem intercepto
+res_mod_noint <- rma(yi = z_fisher, vi = variancia,
+               mods = ~factor(estrategia_predacao)-1,
+               vtype = "UB", data = tabela,
+               weighted = TRUE, knha=FALSE, level=95, digits=4)
+res_mod_noint
+confint(res_mod_noint)
+forest(res_mod_noint)
+
+anova(res_mod_noint) #significativo
+
+library(ggplot2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+ad
+
+
+
+
+
+
+
+
+
+
+
+
+res <- rma(yi = z_fisher, vi = variancia, measure = "ZCOR",
+           data = tabela, slab = autores)
+
+res
+summary(res)
+
+forest(res, header = c("studies", "Confidence Interval"), mlab = "summary")
+
+#com moderadores
+model_mod <- rma(yi = z_fisher, se = tabela$z_fisher_SE, measure = "ZCOR",
+           mods = cbind(estrategia_predacao, clima, Taxa, ano, ambiente),
+           data = tabela, slab = autores)
+summary(model_mod)
+model_mod
+
+forest(model_mod)
+
+
+forest(model_mod,
+        slab = paste(tabela$autores, tabela$ano, sep = ", "))
+preds <- predict.rma(model_mod, newmods = c("senta-espera", "busca ativa"))
+addpoly(preds$pred, sei = preds$se, atransf = exp,
+           mlab = c("10 Degrees", "30 Degrees", "50 Degrees"))
+text(-9, 15, "Author(s) and Year", pos = 4, font = 2)
+text(7, 15, "Relative Risk [95% CI]", pos = 2, font = 2)
+abline(h = 0)
+
+
+
+
+#heterogeneidade
+funnel(model_mod)
+funnel(res)
+
+
+
+#cummulative met
+cumul <- cumul.rma.uni(x = res, order = order(tabela$ano), 
+                       data = tabela)
+
+forest.cumul.rma(cumul, header = TRUE, ilab = tabela$ano, ilab.xpos = 1)
+
+
+
+
+
+
+
+
+
+
+
+
